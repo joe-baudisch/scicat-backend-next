@@ -84,12 +84,7 @@ describe("AttachmentsController - findOneAndUpdate", () => {
     const dto = { description: null };
     const headers = { "content-type": "application/merge-patch+json" };
 
-    const result = await controller.findOneAndUpdate(
-      { headers },
-      "123",
-      headers,
-      dto,
-    );
+    await controller.findOneAndUpdate({ headers }, "123", headers, dto);
 
     const expectedPatched = jmp.apply(mockAttachment, dto);
     expect(service.findOneAndUpdate).toHaveBeenCalledWith(

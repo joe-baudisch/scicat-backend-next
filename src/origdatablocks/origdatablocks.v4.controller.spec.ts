@@ -22,7 +22,6 @@ class CaslAbilityFactoryMock {}
 describe("OrigDatablocksV4Controller", () => {
   let controller: OrigDatablocksV4Controller;
   let origDatablocksService: OrigDatablocksServiceMock;
-  let datasetsService: DatasetsServiceMock;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -39,7 +38,6 @@ describe("OrigDatablocksV4Controller", () => {
       OrigDatablocksV4Controller,
     );
     origDatablocksService = module.get(OrigDatablocksService);
-    datasetsService = module.get(DatasetsService);
   });
 
   it("should be defined", () => {
