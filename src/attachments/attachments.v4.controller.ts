@@ -14,7 +14,9 @@ import {
   NotFoundException,
   Patch,
   Put,
-  HttpCode, Headers, HttpException,
+  HttpCode,
+  Headers,
+  HttpException,
 } from "@nestjs/common";
 import {
   ApiBearerAuth,
@@ -368,11 +370,11 @@ Set \`content-type\` header to \`application/merge-patch+json\` if you would lik
     @Headers() headers: Record<string, string>,
     @Body() updateAttachmentDto: PartialUpdateAttachmentV4Dto,
   ): Promise<OutputAttachmentV4Dto | null> {
-
-    const headerDateString = headers['if-unmodified-since'];
-    const headerDate = headerDateString && !isNaN(new Date(headerDateString).getTime())
-      ? new Date(headerDateString)
-      : null;
+    const headerDateString = headers["if-unmodified-since"];
+    const headerDate =
+      headerDateString && !isNaN(new Date(headerDateString).getTime())
+        ? new Date(headerDateString)
+        : null;
 
     const foundAttachment = await this.checkPermissionsForAttachment(
       request,
@@ -384,12 +386,14 @@ Set \`content-type\` header to \`application/merge-patch+json\` if you would lik
         ? jmp.apply(foundAttachment, updateAttachmentDto)
         : updateAttachmentDto;
 
-
     if (headerDate && headerDate <= foundAttachment.updatedAt) {
-      throw new HttpException("Update error due to failed if-modified-since condition", HttpStatus.PRECONDITION_FAILED);
+      throw new HttpException(
+        "Update error due to failed if-modified-since condition",
+        HttpStatus.PRECONDITION_FAILED,
+      );
     } else {
       return this.attachmentsService.findOneAndUpdate(
-        {_id: aid},
+        { _id: aid },
         updateAttachmentDtoForservice,
       );
     }

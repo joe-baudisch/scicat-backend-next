@@ -18,7 +18,9 @@ import {
   ForbiddenException,
   InternalServerErrorException,
   ConflictException,
-  UsePipes, Headers, HttpException
+  UsePipes,
+  Headers,
+  HttpException,
 } from "@nestjs/common";
 import {
   ApiBearerAuth,
@@ -782,12 +784,14 @@ Set \`content-type\` header to \`application/merge-patch+json\` if you would lik
     @Param("pid") pid: string,
     @Headers() headers: Record<string, string>,
     @Body()
-      updateDatasetDto: PartialUpdateDatasetDto,
+    updateDatasetDto: PartialUpdateDatasetDto,
   ): Promise<OutputDatasetDto | null> {
-
-    return this.findByIdAndUpdateInternal(request, pid, headers, updateDatasetDto)
-
-
+    return this.findByIdAndUpdateInternal(
+      request,
+      pid,
+      headers,
+      updateDatasetDto,
+    );
   }
 
   async findByIdAndUpdateInternal(
@@ -795,16 +799,16 @@ Set \`content-type\` header to \`application/merge-patch+json\` if you would lik
     @Param("pid") pid: string,
     @Headers() headers: Record<string, string>,
     @Body()
-      updateDatasetDto: PartialUpdateDatasetDto,
+    updateDatasetDto: PartialUpdateDatasetDto,
   ): Promise<OutputDatasetDto | null> {
-
-    const headerDateString = headers['if-unmodified-since'];
-    const headerDate = headerDateString && !isNaN(new Date(headerDateString).getTime())
-      ? new Date(headerDateString)
-      : null;
+    const headerDateString = headers["if-unmodified-since"];
+    const headerDate =
+      headerDateString && !isNaN(new Date(headerDateString).getTime())
+        ? new Date(headerDateString)
+        : null;
 
     const foundDataset = await this.datasetsService.findOne({
-      where: {pid},
+      where: { pid },
     });
 
     await this.checkPermissionsForDatasetExtended(
@@ -830,7 +834,10 @@ Set \`content-type\` header to \`application/merge-patch+json\` if you would lik
     }
 
     if (headerDate && headerDate <= foundDataset.updatedAt) {
-      throw new HttpException("Update error due to failed if-modified-since condition", HttpStatus.PRECONDITION_FAILED);
+      throw new HttpException(
+        "Update error due to failed if-modified-since condition",
+        HttpStatus.PRECONDITION_FAILED,
+      );
     } else {
       const updateDatasetDtoForService =
         request.headers["content-type"] === "application/merge-patch+json"

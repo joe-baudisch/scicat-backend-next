@@ -12,7 +12,8 @@ import {
   HttpException,
   HttpStatus,
   NotFoundException,
-  Req, Headers,
+  Req,
+  Headers,
 } from "@nestjs/common";
 import {
   ApiBearerAuth,
@@ -423,9 +424,14 @@ export class PublishedDataV4Controller {
     const datasetPids = publishedData.datasetPids;
     await Promise.all(
       datasetPids.map(async (pid) => {
-        await this.datasetsController.findByIdAndUpdateInternal(request, pid, headers, {
-          isPublished: true,
-        });
+        await this.datasetsController.findByIdAndUpdateInternal(
+          request,
+          pid,
+          headers,
+          {
+            isPublished: true,
+          },
+        );
       }),
     );
 
@@ -583,10 +589,15 @@ export class PublishedDataV4Controller {
 
     await Promise.all(
       publishedData.datasetPids.map(async (pid) => {
-        await this.datasetsController.findByIdAndUpdateInternal(request, pid, headers, {
-          isPublished: true,
-          datasetlifecycle: {publishedOn: data.registeredTime},
-        });
+        await this.datasetsController.findByIdAndUpdateInternal(
+          request,
+          pid,
+          headers,
+          {
+            isPublished: true,
+            datasetlifecycle: { publishedOn: data.registeredTime },
+          },
+        );
       }),
     );
     const registerDoiUri = this.configService.get<string>("registerDoiUri");

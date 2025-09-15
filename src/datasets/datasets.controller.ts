@@ -1401,20 +1401,21 @@ export class DatasetsController {
     @Req() request: Request,
     @Param("pid") pid: string,
     @Body()
-    @Headers() headers: Record<string, string>,
+    @Headers()
+    headers: Record<string, string>,
     updateDatasetObsoleteDto:
       | PartialUpdateRawDatasetObsoleteDto
       | PartialUpdateDerivedDatasetObsoleteDto
       | PartialUpdateDatasetDto,
   ): Promise<OutputDatasetObsoleteDto | null> {
-
-    const headerDateString = headers['if-unmodified-since'];
-    const headerDate = headerDateString && !isNaN(new Date(headerDateString).getTime())
-      ? new Date(headerDateString)
-      : null;
+    const headerDateString = headers["if-unmodified-since"];
+    const headerDate =
+      headerDateString && !isNaN(new Date(headerDateString).getTime())
+        ? new Date(headerDateString)
+        : null;
 
     const foundDataset = await this.datasetsService.findOne({
-      where: {pid},
+      where: { pid },
     });
 
     if (!foundDataset) {
@@ -1422,7 +1423,10 @@ export class DatasetsController {
     }
 
     if (headerDate && headerDate <= foundDataset.updatedAt) {
-      throw new HttpException("Update error due to failed if-modified-since condition", HttpStatus.PRECONDITION_FAILED);
+      throw new HttpException(
+        "Update error due to failed if-modified-since condition",
+        HttpStatus.PRECONDITION_FAILED,
+      );
     } else {
       // NOTE: Default validation pipe does not validate union types. So we need custom validation.
       let dtoType;

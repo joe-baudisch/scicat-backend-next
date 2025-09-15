@@ -1,11 +1,11 @@
-import {Test, TestingModule} from "@nestjs/testing";
-import {OrigDatablocksV4Controller} from "./origdatablocks.v4.controller";
-import {OrigDatablocksService} from "src/origdatablocks/origdatablocks.service";
-import {DatasetsService} from "src/datasets/datasets.service";
-import {CaslAbilityFactory} from "src/casl/casl-ability.factory";
-import {ConfigModule} from "@nestjs/config";
-import {NotFoundException, HttpException} from "@nestjs/common";
-import {Request} from "express";
+import { Test, TestingModule } from "@nestjs/testing";
+import { OrigDatablocksV4Controller } from "./origdatablocks.v4.controller";
+import { OrigDatablocksService } from "src/origdatablocks/origdatablocks.service";
+import { DatasetsService } from "src/datasets/datasets.service";
+import { CaslAbilityFactory } from "src/casl/casl-ability.factory";
+import { ConfigModule } from "@nestjs/config";
+import { NotFoundException, HttpException } from "@nestjs/common";
+import { Request } from "express";
 
 class OrigDatablocksServiceMock {
   findOne = jest.fn();
@@ -29,13 +29,15 @@ describe("OrigDatablocksV4Controller", () => {
       controllers: [OrigDatablocksV4Controller],
       imports: [ConfigModule],
       providers: [
-        {provide: OrigDatablocksService, useClass: OrigDatablocksServiceMock},
-        {provide: DatasetsService, useClass: DatasetsServiceMock},
-        {provide: CaslAbilityFactory, useClass: CaslAbilityFactoryMock},
+        { provide: OrigDatablocksService, useClass: OrigDatablocksServiceMock },
+        { provide: DatasetsService, useClass: DatasetsServiceMock },
+        { provide: CaslAbilityFactory, useClass: CaslAbilityFactoryMock },
       ],
     }).compile();
 
-    controller = module.get<OrigDatablocksV4Controller>(OrigDatablocksV4Controller);
+    controller = module.get<OrigDatablocksV4Controller>(
+      OrigDatablocksV4Controller,
+    );
     origDatablocksService = module.get(OrigDatablocksService);
     datasetsService = module.get(DatasetsService);
   });
@@ -46,7 +48,7 @@ describe("OrigDatablocksV4Controller", () => {
 
   describe("findByIdAndUpdate", () => {
     const mockRequest = {
-      user: {id: "user123"},
+      user: { id: "user123" },
     } as unknown as Request;
 
     const mockHeaders = {
@@ -69,15 +71,24 @@ describe("OrigDatablocksV4Controller", () => {
     };
 
     beforeEach(() => {
-      jest.spyOn(controller as any, "checkPermissionsForOrigDatablockWrite").mockResolvedValue(mockDatablock);
-      jest.spyOn(controller as any, "updateDatasetSizeAndFiles").mockResolvedValue(undefined);
+      jest
+        .spyOn(controller, "checkPermissionsForOrigDatablockWrite")
+        .mockResolvedValue(mockDatablock);
+      jest
+        .spyOn(controller, "updateDatasetSizeAndFiles")
+        .mockResolvedValue(undefined);
     });
 
     it("should throw NotFoundException if datablock not found", async () => {
       jest.spyOn(origDatablocksService, "findOne").mockResolvedValue(null);
 
       await expect(
-        controller.findByIdAndUpdate(mockRequest, "db123", mockHeaders, mockUpdateDto),
+        controller.findByIdAndUpdate(
+          mockRequest,
+          "db123",
+          mockHeaders,
+          mockUpdateDto,
+        ),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -88,16 +99,25 @@ describe("OrigDatablocksV4Controller", () => {
       });
 
       const oldDate = new Date(Date.now() - 10000).toISOString();
-      const headers = {"if-unmodified-since": oldDate};
+      const headers = { "if-unmodified-since": oldDate };
 
       await expect(
-        controller.findByIdAndUpdate(mockRequest, "db123", headers, mockUpdateDto),
+        controller.findByIdAndUpdate(
+          mockRequest,
+          "db123",
+          headers,
+          mockUpdateDto,
+        ),
       ).rejects.toThrow(HttpException);
     });
 
     it("should throw NotFoundException if update returns null", async () => {
-      jest.spyOn(origDatablocksService, "findOne").mockResolvedValue(mockDatablock);
-      jest.spyOn(origDatablocksService, "findByIdAndUpdate").mockResolvedValue(null);
+      jest
+        .spyOn(origDatablocksService, "findOne")
+        .mockResolvedValue(mockDatablock);
+      jest
+        .spyOn(origDatablocksService, "findByIdAndUpdate")
+        .mockResolvedValue(null);
 
       await expect(
         controller.findByIdAndUpdate(mockRequest, "db123", {}, mockUpdateDto),
@@ -105,18 +125,36 @@ describe("OrigDatablocksV4Controller", () => {
     });
 
     it("should return updated datablock on success", async () => {
-      jest.spyOn(origDatablocksService, "findOne").mockResolvedValue(mockDatablock);
-      jest.spyOn(origDatablocksService, "findByIdAndUpdate").mockResolvedValue(updatedDatablock);
+      jest
+        .spyOn(origDatablocksService, "findOne")
+        .mockResolvedValue(mockDatablock);
+      jest
+        .spyOn(origDatablocksService, "findByIdAndUpdate")
+        .mockResolvedValue(updatedDatablock);
 
-      const result = await controller.findByIdAndUpdate(mockRequest, "db123", {}, mockUpdateDto);
+      const result = await controller.findByIdAndUpdate(
+        mockRequest,
+        "db123",
+        {},
+        mockUpdateDto,
+      );
       expect(result).toEqual(updatedDatablock);
     });
 
     it("should succeed if 'if-unmodified-since' header is missing", async () => {
-      jest.spyOn(origDatablocksService, "findOne").mockResolvedValue(mockDatablock);
-      jest.spyOn(origDatablocksService, "findByIdAndUpdate").mockResolvedValue(updatedDatablock);
+      jest
+        .spyOn(origDatablocksService, "findOne")
+        .mockResolvedValue(mockDatablock);
+      jest
+        .spyOn(origDatablocksService, "findByIdAndUpdate")
+        .mockResolvedValue(updatedDatablock);
 
-      const result = await controller.findByIdAndUpdate(mockRequest, "db123", {}, mockUpdateDto);
+      const result = await controller.findByIdAndUpdate(
+        mockRequest,
+        "db123",
+        {},
+        mockUpdateDto,
+      );
       expect(result).toEqual(updatedDatablock);
     });
 
@@ -125,14 +163,20 @@ describe("OrigDatablocksV4Controller", () => {
         "if-unmodified-since": "not-a-date",
       };
 
-      jest.spyOn(origDatablocksService, "findOne").mockResolvedValue(mockDatablock);
-      jest.spyOn(origDatablocksService, "findByIdAndUpdate").mockResolvedValue(updatedDatablock);
+      jest
+        .spyOn(origDatablocksService, "findOne")
+        .mockResolvedValue(mockDatablock);
+      jest
+        .spyOn(origDatablocksService, "findByIdAndUpdate")
+        .mockResolvedValue(updatedDatablock);
 
-      const result = await controller.findByIdAndUpdate(mockRequest, "db123", malformedHeaders, mockUpdateDto);
+      const result = await controller.findByIdAndUpdate(
+        mockRequest,
+        "db123",
+        malformedHeaders,
+        mockUpdateDto,
+      );
       expect(result).toEqual(updatedDatablock);
     });
-
-
   });
 });
-

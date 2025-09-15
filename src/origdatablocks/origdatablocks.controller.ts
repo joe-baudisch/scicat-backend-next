@@ -12,7 +12,9 @@ import {
   HttpStatus,
   Req,
   ForbiddenException,
-  NotFoundException, Headers, HttpException,
+  NotFoundException,
+  Headers,
+  HttpException,
 } from "@nestjs/common";
 import { Request } from "express";
 import { OrigDatablocksService } from "./origdatablocks.service";
@@ -652,18 +654,24 @@ export class OrigDatablocksController {
       Action.OrigdatablockUpdate,
     );
 
-    const headerDateString = headers['if-unmodified-since'];
-    const headerDate = headerDateString && !isNaN(new Date(headerDateString).getTime())
-      ? new Date(headerDateString)
-      : null;
+    const headerDateString = headers["if-unmodified-since"];
+    const headerDate =
+      headerDateString && !isNaN(new Date(headerDateString).getTime())
+        ? new Date(headerDateString)
+        : null;
 
-    const datablock = await this.origDatablocksService.findOne({where: {_id: id}})
+    const datablock = await this.origDatablocksService.findOne({
+      where: { _id: id },
+    });
     if (!datablock) {
       throw new NotFoundException("Datablock not found");
     }
 
     if (headerDate && headerDate <= datablock.updatedAt) {
-      throw new HttpException("Update error due to failed if-modified-since condition", HttpStatus.PRECONDITION_FAILED);
+      throw new HttpException(
+        "Update error due to failed if-modified-since condition",
+        HttpStatus.PRECONDITION_FAILED,
+      );
     } else {
       const origdatablock = await this.origDatablocksService.findByIdAndUpdate(
         id,

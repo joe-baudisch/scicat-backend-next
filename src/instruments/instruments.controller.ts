@@ -14,12 +14,12 @@ import {
   Post,
   Query,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
 } from "@nestjs/common";
-import {MongoError} from "mongodb";
-import {InstrumentsService} from "./instruments.service";
-import {CreateInstrumentDto} from "./dto/create-instrument.dto";
-import {PartialUpdateInstrumentDto} from "./dto/update-instrument.dto";
+import { MongoError } from "mongodb";
+import { InstrumentsService } from "./instruments.service";
+import { CreateInstrumentDto } from "./dto/create-instrument.dto";
+import { PartialUpdateInstrumentDto } from "./dto/update-instrument.dto";
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -27,21 +27,19 @@ import {
   ApiResponse,
   ApiTags,
 } from "@nestjs/swagger";
-import {PoliciesGuard} from "src/casl/guards/policies.guard";
-import {CheckPolicies} from "src/casl/decorators/check-policies.decorator";
-import {AppAbility} from "src/casl/casl-ability.factory";
-import {Action} from "src/casl/action.enum";
-import {Instrument, InstrumentDocument} from "./schemas/instrument.schema";
-import {
-  FormatPhysicalQuantitiesInterceptor
-} from "src/common/interceptors/format-physical-quantities.interceptor";
-import {IFilters} from "src/common/interfaces/common.interface";
+import { PoliciesGuard } from "src/casl/guards/policies.guard";
+import { CheckPolicies } from "src/casl/decorators/check-policies.decorator";
+import { AppAbility } from "src/casl/casl-ability.factory";
+import { Action } from "src/casl/action.enum";
+import { Instrument, InstrumentDocument } from "./schemas/instrument.schema";
+import { FormatPhysicalQuantitiesInterceptor } from "src/common/interceptors/format-physical-quantities.interceptor";
+import { IFilters } from "src/common/interfaces/common.interface";
 import {
   filterDescription,
   filterExample,
   replaceLikeOperator,
 } from "src/common/utils";
-import {CountApiResponse} from "src/common/types";
+import { CountApiResponse } from "src/common/types";
 
 @ApiBearerAuth()
 @ApiTags("instruments")
@@ -165,38 +163,51 @@ export class InstrumentsController {
     @Body() updateInstrumentDto: PartialUpdateInstrumentDto,
     @Headers() headers: Record<string, string>,
   ): Promise<Instrument | null> {
+    const headerDateString = headers["if-unmodified-since"];
+    const headerDate =
+      headerDateString && !isNaN(new Date(headerDateString).getTime())
+        ? new Date(headerDateString)
+        : null;
 
+    return this.instrumentsService
+      .findOne({ where: { _id: id } })
+      .then((instrument) => {
+        if (!instrument) {
+          throw new NotFoundException("Instrument not found");
+        }
 
-    const headerDateString = headers['if-unmodified-since'];
-    const headerDate = headerDateString && !isNaN(new Date(headerDateString).getTime())
-      ? new Date(headerDateString)
-      : null;
+        // If header is missing, always update
+        if (!headerDate) {
+          return this.instrumentsService.update(
+            { _id: id },
+            updateInstrumentDto,
+          );
+        }
 
-    return this.instrumentsService.findOne({where: {_id: id}}).then((instrument) => {
-      if (!instrument) {
-        throw new NotFoundException("Instrument not found");
-      }
-
-      // If header is missing, always update
-      if (!headerDate) {
-        return this.instrumentsService.update({_id: id}, updateInstrumentDto);
-      }
-
-      if (headerDate && headerDate <= instrument.updatedAt) {
-        throw new HttpException("Update error due to failed if-modified-since condition", HttpStatus.PRECONDITION_FAILED);
-      } else {
-        return this.instrumentsService.update({_id: id}, updateInstrumentDto);
-      }
-    }).then((updatedInstrument) => {
-      return updatedInstrument;
-    }).catch((error) => {
-      if ((error as MongoError).code === 11000) {
-        throw new ConflictException("Instrument with the same unique name already exists");
-      } else {
-        throw error
-      }
-    });
-
+        if (headerDate && headerDate <= instrument.updatedAt) {
+          throw new HttpException(
+            "Update error due to failed if-modified-since condition",
+            HttpStatus.PRECONDITION_FAILED,
+          );
+        } else {
+          return this.instrumentsService.update(
+            { _id: id },
+            updateInstrumentDto,
+          );
+        }
+      })
+      .then((updatedInstrument) => {
+        return updatedInstrument;
+      })
+      .catch((error) => {
+        if ((error as MongoError).code === 11000) {
+          throw new ConflictException(
+            "Instrument with the same unique name already exists",
+          );
+        } else {
+          throw error;
+        }
+      });
   }
 
   @UseGuards(PoliciesGuard)

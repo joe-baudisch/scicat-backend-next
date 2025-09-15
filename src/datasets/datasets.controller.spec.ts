@@ -1,31 +1,27 @@
-import {Test, TestingModule} from "@nestjs/testing";
-import {AttachmentsService} from "src/attachments/attachments.service";
-import {DatablocksService} from "src/datablocks/datablocks.service";
-import {OrigDatablocksService} from "src/origdatablocks/origdatablocks.service";
-import {DatasetsController} from "./datasets.controller";
-import {DatasetsService} from "./datasets.service";
-import {LogbooksService} from "src/logbooks/logbooks.service";
-import {CaslAbilityFactory} from "src/casl/casl-ability.factory";
-import {ConfigModule} from "@nestjs/config";
+import { Test, TestingModule } from "@nestjs/testing";
+import { AttachmentsService } from "src/attachments/attachments.service";
+import { DatablocksService } from "src/datablocks/datablocks.service";
+import { OrigDatablocksService } from "src/origdatablocks/origdatablocks.service";
+import { DatasetsController } from "./datasets.controller";
+import { DatasetsService } from "./datasets.service";
+import { LogbooksService } from "src/logbooks/logbooks.service";
+import { CaslAbilityFactory } from "src/casl/casl-ability.factory";
+import { ConfigModule } from "@nestjs/config";
 import {
   ForbiddenException,
   HttpException,
-  NotFoundException
+  NotFoundException,
 } from "@nestjs/common";
-import {DatasetType} from "./types/dataset-type.enum";
-import {Request} from "express";
+import { DatasetType } from "./types/dataset-type.enum";
+import { Request } from "express";
 
-class AttachmentsServiceMock {
-}
+class AttachmentsServiceMock {}
 
-class DatablocksServiceMock {
-}
+class DatablocksServiceMock {}
 
-class OrigDatablocksServiceMock {
-}
+class OrigDatablocksServiceMock {}
 
-class LogbooksServiceMock {
-}
+class LogbooksServiceMock {}
 
 class DatasetsServiceMock {
   findOne = jest.fn();
@@ -46,12 +42,12 @@ describe("DatasetsController", () => {
       controllers: [DatasetsController],
       imports: [ConfigModule],
       providers: [
-        {provide: AttachmentsService, useClass: AttachmentsServiceMock},
-        {provide: LogbooksService, useClass: LogbooksServiceMock},
-        {provide: DatablocksService, useClass: DatablocksServiceMock},
-        {provide: DatasetsService, useClass: DatasetsServiceMock},
-        {provide: OrigDatablocksService, useClass: OrigDatablocksServiceMock},
-        {provide: CaslAbilityFactory, useClass: CaslAbilityFactoryMock},
+        { provide: AttachmentsService, useClass: AttachmentsServiceMock },
+        { provide: LogbooksService, useClass: LogbooksServiceMock },
+        { provide: DatablocksService, useClass: DatablocksServiceMock },
+        { provide: DatasetsService, useClass: DatasetsServiceMock },
+        { provide: OrigDatablocksService, useClass: OrigDatablocksServiceMock },
+        { provide: CaslAbilityFactory, useClass: CaslAbilityFactoryMock },
       ],
     }).compile();
 
@@ -70,9 +66,9 @@ describe("DatasetsController", () => {
 
       await expect(
         controller.findByIdAndUpdate(
-          {user: {}} as Request,
+          { user: {} } as Request,
           "some-pid",
-          {"if-unmodified-since": "2023-01-01T00:00:00Z"},
+          { "if-unmodified-since": "2023-01-01T00:00:00Z" },
           {},
         ),
       ).rejects.toThrow(NotFoundException);
@@ -88,9 +84,9 @@ describe("DatasetsController", () => {
 
       await expect(
         controller.findByIdAndUpdate(
-          {user: {}} as Request,
+          { user: {} } as Request,
           "some-pid",
-          {"if-unmodified-since": "2023-01-01T00:00:00Z"},
+          { "if-unmodified-since": "2023-01-01T00:00:00Z" },
           {},
         ),
       ).rejects.toThrow(HttpException);
@@ -104,16 +100,18 @@ describe("DatasetsController", () => {
       };
       datasetsService.findOne.mockResolvedValue(mockDataset);
       jest.spyOn(controller, "validateDatasetObsolete").mockResolvedValue({});
-      jest.spyOn(controller, "generateDatasetInstanceForPermissions").mockResolvedValue({});
+      jest
+        .spyOn(controller, "generateDatasetInstanceForPermissions")
+        .mockResolvedValue({});
       caslAbilityFactory.datasetInstanceAccess.mockReturnValue({
         can: () => false,
       });
 
       await expect(
         controller.findByIdAndUpdate(
-          {user: {}} as Request,
+          { user: {} } as Request,
           "some-pid",
-          {"if-unmodified-since": "2023-01-02T00:00:00Z"},
+          { "if-unmodified-since": "2023-01-02T00:00:00Z" },
           {},
         ),
       ).rejects.toThrow(ForbiddenException);
@@ -125,22 +123,28 @@ describe("DatasetsController", () => {
         updatedAt: new Date("2023-01-01T00:00:00Z"),
         type: DatasetType.Raw,
       };
-      const updatedDataset = {pid: "some-pid", name: "Updated"};
+      const updatedDataset = { pid: "some-pid", name: "Updated" };
 
       datasetsService.findOne.mockResolvedValue(mockDataset);
       jest.spyOn(controller, "validateDatasetObsolete").mockResolvedValue({});
-      jest.spyOn(controller, "generateDatasetInstanceForPermissions").mockResolvedValue({});
+      jest
+        .spyOn(controller, "generateDatasetInstanceForPermissions")
+        .mockResolvedValue({});
       caslAbilityFactory.datasetInstanceAccess.mockReturnValue({
         can: () => true,
       });
-      jest.spyOn(controller, "convertObsoleteToCurrentSchema").mockReturnValue({});
+      jest
+        .spyOn(controller, "convertObsoleteToCurrentSchema")
+        .mockReturnValue({});
       datasetsService.findByIdAndUpdate.mockResolvedValue(updatedDataset);
-      jest.spyOn(controller, "convertCurrentToObsoleteSchema").mockReturnValue(updatedDataset);
+      jest
+        .spyOn(controller, "convertCurrentToObsoleteSchema")
+        .mockReturnValue(updatedDataset);
 
       const result = await controller.findByIdAndUpdate(
-        {user: {}} as Request,
+        { user: {} } as Request,
         "some-pid",
-        {"if-unmodified-since": "2023-01-02T00:00:00Z"},
+        { "if-unmodified-since": "2023-01-02T00:00:00Z" },
         {},
       );
 
@@ -153,28 +157,32 @@ describe("DatasetsController", () => {
         updatedAt: new Date("2023-01-01T00:00:00Z"),
         type: DatasetType.Raw,
       };
-      const updatedDataset = {pid: "some-pid", name: "Updated"};
+      const updatedDataset = { pid: "some-pid", name: "Updated" };
 
       datasetsService.findOne.mockResolvedValue(mockDataset);
       jest.spyOn(controller, "validateDatasetObsolete").mockResolvedValue({});
-      jest.spyOn(controller, "generateDatasetInstanceForPermissions").mockResolvedValue({});
+      jest
+        .spyOn(controller, "generateDatasetInstanceForPermissions")
+        .mockResolvedValue({});
       caslAbilityFactory.datasetInstanceAccess.mockReturnValue({
         can: () => true,
       });
-      jest.spyOn(controller, "convertObsoleteToCurrentSchema").mockReturnValue({});
+      jest
+        .spyOn(controller, "convertObsoleteToCurrentSchema")
+        .mockReturnValue({});
       datasetsService.findByIdAndUpdate.mockResolvedValue(updatedDataset);
-      jest.spyOn(controller, "convertCurrentToObsoleteSchema").mockReturnValue(updatedDataset);
+      jest
+        .spyOn(controller, "convertCurrentToObsoleteSchema")
+        .mockReturnValue(updatedDataset);
 
       const result = await controller.findByIdAndUpdate(
-        {user: {}} as Request,
+        { user: {} } as Request,
         "some-pid",
-        {"if-unmodified-since": "not-a-valid-date"}, // invalid header
+        { "if-unmodified-since": "not-a-valid-date" }, // invalid header
         {},
       );
 
       expect(result).toEqual(updatedDataset);
     });
-
-
   });
 });
